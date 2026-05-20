@@ -1,0 +1,27 @@
+name: Deploy my resume HTML to S3
+
+on: push
+
+jobs:
+
+  deploy-the-static-site-to-s3:
+    
+    runs-on: ubuntu-latest
+    
+    steps:
+    
+      - name: please Checkout code from my repo
+        uses: actions/checkout@v4
+
+      - name: please Configure AWS Credentials to deploy to S3
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-central-1
+
+      - name: please run these commands to deploy the site to the specific S3 bucket
+        run: |
+          aws s3 sync ./ s3://static-site-jules/ \
+          --exclude "*" \
+          --include "index.html"
