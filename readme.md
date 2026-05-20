@@ -1,8 +1,13 @@
 # AWS S3 Static Website Deployment with GitHub Actions 🚀
 
+## Architecture Diagram
+
+![AWS S3 CI/CD Architecture](./images/architecture-diagram.png)
+
 This project demonstrates an automated CI/CD pipeline for deploying a personal portfolio website that i am working on to AWS S3 using GitHub Actions.
 
 The implementation showcases cloud engineering practices by integrating source control, automation, and AWS services into a streamlined deployment workflow.
+
 
 ## Core Skills Demonstrated
 
