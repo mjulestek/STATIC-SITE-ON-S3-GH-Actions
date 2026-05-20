@@ -10,7 +10,7 @@ on:
         default: production
         options:
           - production
-          - staging
+          - testing
           - development
       tagging-the-the-application:
         description: 'Please enter the tag for the application'
