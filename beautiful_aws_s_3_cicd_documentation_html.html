@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AWS S3 Static Website CI/CD Documentation</title>
+
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&family=Pacifico&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #050816;
+      --text: #f8fafc;
+      --muted: #a7b4c8;
+      --cyan: #22d3ee;
+      --purple: #a78bfa;
+      --green: #34d399;
+      --border: rgba(255, 255, 255, 0.14);
+      --shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; scroll-behavior: smooth; }
+
+    body {
+      font-family: Inter, sans-serif;
+      background:
+        radial-gradient(circle at 10% 10%, rgba(34, 211, 238, 0.18), transparent 32%),
+        radial-gradient(circle at 90% 5%, rgba(167, 139, 250, 0.22), transparent 34%),
+        radial-gradient(circle at 50% 95%, rgba(52, 211, 153, 0.12), transparent 36%),
+        var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+      background-size: 52px 52px;
+      mask-image: linear-gradient(to bottom, black, transparent 75%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .shell { max-width: 1120px; margin: 0 auto; padding: 28px 20px 58px; }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: linear-gradient(135deg, rgba(255,255,255,.12), rgba(255,255,255,.04));
+      box-shadow: var(--shadow);
+      border-radius: 34px;
+      padding: clamp(30px, 5vw, 54px);
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      width: 360px;
+      height: 360px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, rgba(34,211,238,.42), rgba(167,139,250,.35));
+      filter: blur(60px);
+      right: -140px;
+      top: -130px;
+      opacity: .7;
+    }
+
+    .hero-content { position: relative; z-index: 2; max-width: 820px; }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 14px;
+      border: 1px solid rgba(34, 211, 238, .35);
+      background: rgba(34, 211, 238, .1);
+      color: #cffafe;
+      border-radius: 999px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      font-size: .95rem;
+    }
+
+    h1 {
+      font-size: clamp(2.25rem, 6vw, 4.8rem);
+      line-height: .98;
+      letter-spacing: -0.075em;
+      font-weight: 900;
+      margin-bottom: 22px;
+    }
+
+    .gradient-text {
+      background: linear-gradient(90deg, var(--cyan), var(--purple), var(--green));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .lead { max-width: 740px; color: #dbeafe; font-size: 1.12rem; margin-bottom: 24px; }
+
+    .hero-icons, .tech-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    .icon-pill, .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 10px 14px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.075);
+      color: var(--text);
+      font-weight: 700;
+      font-size: .94rem;
+    }
+
+    .icon-pill i { font-size: 1.3rem; }
+
+    .section {
+      margin-top: 24px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 28px;
+      padding: clamp(22px, 4vw, 30px);
+      box-shadow: 0 18px 45px rgba(0,0,0,.18);
+      backdrop-filter: blur(18px);
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .bubble {
+      width: 44px;
+      height: 44px;
+      display: grid;
+      place-items: center;
+      border-radius: 15px;
+      background: linear-gradient(135deg, rgba(34,211,238,.23), rgba(167,139,250,.22));
+      border: 1px solid var(--border);
+      color: var(--cyan);
+      font-size: 1.15rem;
+      flex: 0 0 auto;
+    }
+
+    h2 { font-size: 1.55rem; letter-spacing: -.04em; }
+    h3 { font-size: 1.05rem; margin-bottom: 6px; color: #e0f2fe; }
+    p { color: var(--muted); }
+
+    .architecture {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr auto 1fr;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .node {
+      min-height: 120px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 18px;
+      border-radius: 22px;
+      background: rgba(255,255,255,.075);
+      border: 1px solid var(--border);
+    }
+
+    .node i { font-size: 2.15rem; margin-bottom: 8px; }
+    .arrow { text-align: center; font-size: 1.7rem; color: var(--cyan); }
+
+    .callout {
+      margin-top: 16px;
+      padding: 15px 17px;
+      border-left: 4px solid var(--cyan);
+      background: rgba(34,211,238,.075);
+      border-radius: 16px;
+      color: #dffbff;
+      font-size: .95rem;
+    }
+
+    .compact-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 12px;
+    }
+
+    .compact-card {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 16px;
+      border-radius: 20px;
+      background: rgba(255,255,255,.07);
+      border: 1px solid var(--border);
+    }
+
+    .compact-card i { font-size: 1.45rem; color: var(--cyan); margin-top: 3px; }
+
+    .quick-steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 12px;
+      counter-reset: quick;
+    }
+
+    .quick-step {
+      position: relative;
+      padding: 18px;
+      border-radius: 20px;
+      background: rgba(255,255,255,.07);
+      border: 1px solid var(--border);
+    }
+
+    .quick-step::before {
+      counter-increment: quick;
+      content: counter(quick, decimal-leading-zero);
+      display: inline-grid;
+      place-items: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, var(--cyan), var(--purple));
+      color: #020617;
+      font-weight: 900;
+    }
+
+    details {
+      margin-top: 12px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.055);
+      overflow: hidden;
+    }
+
+    summary {
+      cursor: pointer;
+      padding: 17px 20px;
+      font-weight: 800;
+      color: #e0f2fe;
+      list-style: none;
+    }
+
+    summary::-webkit-details-marker { display: none; }
+    summary::after { content: "+"; float: right; color: var(--cyan); font-size: 1.25rem; }
+    details[open] summary::after { content: "−"; }
+
+    .details-body { padding: 0 20px 20px; }
+
+    code, pre { font-family: "JetBrains Mono", monospace; }
+
+    pre {
+      overflow-x: auto;
+      margin-top: 12px;
+      padding: 16px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(2, 6, 23, .82);
+      color: #cffafe;
+      font-size: .86rem;
+      line-height: 1.55;
+    }
+
+    code.inline {
+      color: #cffafe;
+      background: rgba(34,211,238,.1);
+      border: 1px solid rgba(34,211,238,.2);
+      border-radius: 8px;
+      padding: 2px 7px;
+    }
+
+    .signature {
+      margin-top: 26px;
+      padding: 30px;
+      border-radius: 28px;
+      border: 1px solid rgba(34,211,238,.24);
+      background: linear-gradient(135deg, rgba(34,211,238,.12), rgba(167,139,250,.12));
+      text-align: center;
+    }
+
+    .signature-name {
+      font-family: Pacifico, cursive;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      background: linear-gradient(90deg, #67e8f9, #a78bfa, #34d399);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      margin: 6px 0;
+    }
+
+    .footer { margin-top: 22px; color: var(--muted); text-align: center; font-size: .92rem; }
+
+    @media (max-width: 850px) {
+      .architecture { grid-template-columns: 1fr; }
+      .arrow { transform: rotate(90deg); }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <div class="hero-content">
+        <div class="eyebrow"><i class="fa-solid fa-cloud-arrow-up"></i> Cloud Engineering Documentation</div>
+        <h1>Deploy a <span class="gradient-text">Static Website</span> to AWS S3 with GitHub Actions</h1>
+        <p class="lead">A modern step-by-step guide for building a real CI/CD pipeline that automatically deploys a portfolio website to AWS S3 every time code is pushed to GitHub.</p>
+        <div class="hero-icons">
+          <span class="icon-pill"><i class="devicon-amazonwebservices-plain-wordmark colored"></i> AWS S3</span>
+          <span class="icon-pill"><i class="devicon-github-original"></i> GitHub Actions</span>
+          <span class="icon-pill"><i class="devicon-git-plain colored"></i> Git</span>
+          <span class="icon-pill"><i class="devicon-linux-plain colored"></i> Linux</span>
+          <span class="icon-pill"><i class="fa-solid fa-shield-halved"></i> IAM</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-title">
+        <div class="bubble"><i class="fa-solid fa-diagram-project"></i></div>
+        <h2>Architecture Overview</h2>
+      </div>
+      <div class="architecture">
+        <div class="node"><div><i class="fa-solid fa-code"></i><h3>Developer</h3><p>Pushes code to GitHub</p></div></div>
+        <div class="arrow">→</div>
+        <div class="node"><div><i class="devicon-github-original"></i><h3>GitHub Actions</h3><p>Runs the CI/CD workflow</p></div></div>
+        <div class="arrow">→</div>
+        <div class="node"><div><i class="fa-brands fa-aws"></i><h3>AWS S3</h3><p>Hosts the live website</p></div></div>
+      </div>
+      <div class="callout"><strong>Flow:</strong> Git Push → GitHub Actions → GitHub Secrets → AWS IAM → S3 Bucket → Live Website</div>
+    </section>
+
+    <section class="section">
+      <div class="section-title">
+        <div class="bubble"><i class="fa-solid fa-bolt"></i></div>
+        <h2>Skills Demonstrated</h2>
+      </div>
+      <div class="compact-grid">
+        <div class="compact-card"><i class="fa-brands fa-aws"></i><div><h3>AWS S3</h3><p>Static website hosting.</p></div></div>
+        <div class="compact-card"><i class="devicon-github-original"></i><div><h3>GitHub Actions</h3><p>Automated CI/CD pipeline.</p></div></div>
+        <div class="compact-card"><i class="fa-solid fa-user-shield"></i><div><h3>IAM</h3><p>Secure deployment access.</p></div></div>
+        <div class="compact-card"><i class="fa-solid fa-key"></i><div><h3>Secrets</h3><p>Protected AWS credentials.</p></div></div>
+        <div class="compact-card"><i class="devicon-git-plain colored"></i><div><h3>Git</h3><p>Push-based deployment flow.</p></div></div>
+        <div class="compact-card"><i class="fa-solid fa-rocket"></i><div><h3>Automation</h3><p>No manual S3 uploads.</p></div></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-title">
+        <div class="bubble"><i class="fa-solid fa-list-check"></i></div>
+        <h2>Implementation Roadmap</h2>
+      </div>
+
+      <div class="quick-steps">
+        <div class="quick-step"><h3>Create GitHub Repo</h3><p>Create a repository such as <code class="inline">portfolio-cicd-on-aws</code>.</p></div>
+        <div class="quick-step"><h3>Add Website Files</h3><p>Use <code class="inline">index.html</code> as your homepage.</p></div>
+        <div class="quick-step"><h3>Create S3 Bucket</h3><p>Enable static website hosting.</p></div>
+        <div class="quick-step"><h3>Create IAM User</h3><p>Grant limited S3 deploy permissions.</p></div>
+        <div class="quick-step"><h3>Add GitHub Secrets</h3><p>Store AWS keys securely in GitHub.</p></div>
+        <div class="quick-step"><h3>Push to Deploy</h3><p>GitHub Actions syncs files to S3.</p></div>
+      </div>
+
+      <details>
+        <summary>Project folder structure</summary>
+        <div class="details-body">
+          <pre><code>project-folder/
+├── index.html
+├── README.md
+└── .github/
+    └── workflows/
+        └── static-site-s3.yml</code></pre>
+        </div>
+      </details>
+
+      <details>
+        <summary>Git commands</summary>
+        <div class="details-body">
+          <pre><code>git init
+git branch -M main
+git remote add origin git@github.com:USERNAME/REPO.git
+git add .
+git commit -m "Initial static website project"
+git push -u origin main</code></pre>
+        </div>
+      </details>
+
+      <details>
+        <summary>S3 public read bucket policy</summary>
+        <div class="details-body">
+          <pre><code>{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "PublicReadGetObject",
+      "Effect": "Allow",
+      "Principal": "*",
+      "Action": "s3:GetObject",
+      "Resource": "arn:aws:s3:::YOUR_BUCKET_NAME/*"
+    }
+  ]
+}</code></pre>
+        </div>
+      </details>
+
+      <details>
+        <summary>Recommended IAM policy</summary>
+        <div class="details-body">
+          <pre><code>{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:PutObject",
+        "s3:DeleteObject",
+        "s3:GetObject",
+        "s3:ListBucket"
+      ],
+      "Resource": [
+        "arn:aws:s3:::YOUR_BUCKET_NAME",
+        "arn:aws:s3:::YOUR_BUCKET_NAME/*"
+      ]
+    }
+  ]
+}</code></pre>
+        </div>
+      </details>
+
+      <details open>
+        <summary>GitHub Actions workflow</summary>
+        <div class="details-body">
+          <pre><code>name: Deploy Static Website to AWS S3
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy-the-static-site-to-s3:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-central-1
+
+      - name: Deploy website to S3
+        run: |
+          aws s3 sync . s3://YOUR_BUCKET_NAME --delete \
+            --exclude ".git/*" \
+            --exclude ".github/*" \
+            --exclude "README.md" \
+            --exclude "images/*"</code></pre>
+        </div>
+      </details>
+    </section>
+
+    <section class="section">
+      <div class="section-title">
+        <div class="bubble"><i class="fa-solid fa-screwdriver-wrench"></i></div>
+        <h2>Quick Troubleshooting</h2>
+      </div>
+      <div class="compact-grid">
+        <div class="compact-card"><i class="fa-solid fa-triangle-exclamation"></i><div><h3>Access Denied</h3><p>Check public access, bucket policy, and S3 website endpoint.</p></div></div>
+        <div class="compact-card"><i class="fa-solid fa-lock"></i><div><h3>AWS Auth Fails</h3><p>Verify GitHub Secrets and IAM access key status.</p></div></div>
+        <div class="compact-card"><i class="fa-solid fa-location-dot"></i><div><h3>Wrong Region</h3><p>Match workflow region with bucket region.</p></div></div>
+        <div class="compact-card"><i class="fa-solid fa-code-branch"></i><div><h3>No Deployment</h3><p>Confirm you pushed to the <code class="inline">main</code> branch.</p></div></div>
+      </div>
+    </section>
+
+    <section class="signature">
+      <p>Built as part of my Cloud / DevOps / SRE learning journey</p>
+      <div class="signature-name">Jules Munyaneza</div>
+      <p>Cloud • DevOps • SRE Engineer in Progress</p>
+    </section>
+
+    <p class="footer">Documentation designed for learning, sharing, and building real cloud deployment confidence.</p>
+  </main>
+</body>
+</html>
