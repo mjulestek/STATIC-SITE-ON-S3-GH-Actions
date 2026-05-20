@@ -4,13 +4,21 @@ on:
   workflow_dispatch:
     inputs:
       environment-one:
+        type: choice
         description: 'Please select the environment to deploy to'
         required: true
-        default: 'production'
+        default: production
+        options:
+          - production
+          - staging
+          - development
+      tagging-the-the-application:
+        description: 'Please enter the tag for the application'
+        required: true
 
 jobs:
   inputs-demonstration:
     runs-on: ubuntu-latest
     steps:
       - name: Show the selected environment  
-        run: echo "Deploying to ${{ inputs.environment-one }}"
+        run: echo "Deploying the ${{ inputs.tagging-the-the-application }} application to ${{ inputs.environment-one }}"
