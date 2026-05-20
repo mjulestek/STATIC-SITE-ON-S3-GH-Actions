@@ -1,0 +1,16 @@
+name: inputs Demonstration
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment-one:
+        description: 'Please select the environment to deploy to'
+        required: true
+        default: 'production'
+
+jobs:
+  inputs-demonstration:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Show the selected environment  
+        run: echo "Deploying to ${{ inputs.environment-one }}"
