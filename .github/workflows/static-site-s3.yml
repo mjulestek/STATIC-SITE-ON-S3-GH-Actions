@@ -23,5 +23,5 @@ jobs:
       - name: please run these commands to deploy the site to the specific S3 bucket
         run: |
           aws s3 sync ./ s3://static-site-jules/ \
-          --exclude "*" \
-          --include "index.html"
+          --exclude ".git/*" \
+          --include ".github/*"
